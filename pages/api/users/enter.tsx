@@ -4,18 +4,36 @@ import client from "@libs/server/client";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { phone, email } = req.body;
-  const payload = phone ? { phone: +phone } : { email };
-  const user = await client.user.upsert({
-    where: {
-      ...payload,
-    },
-    create: {
-      name: "Anonymous",
-      ...payload,
-    },
-    update: {},
-  });
-  console.log(user);
+  let user;
+  if (email) {
+    user = await client.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (user) console.log("found it");
+    if (!user) {
+      console.log("did not find ");
+      await client.user.create({
+        data: {
+          name: "Anonymous",
+          email: email,
+        },
+      });
+    }
+  }
+  // const payload = phone ? { phone: +phone } : { email };
+  // const user = await client.user.upsert({
+  //   where: {
+  //     ...payload,
+  //   },
+  //   create: {
+  //     name: "Anonymous",
+  //     ...payload,
+  //   },
+  //   update: {},
+  // });
+  // console.log(user);
   /* if (email) {
     user = await client.user.findUnique({
       where: {
